@@ -1,0 +1,142 @@
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
+}
+
+.container-fluid {
+    padding: 0;
+}
+
+/* navbar */
+
+.nav-link {
+    color: #000000;
+}
+
+.navbar-nav {
+    background-color: #ffffff;
+}
+
+.navbar-nav li {
+    border: 1px solid #cc0e74;
+}
+
+.fas {
+    color: #ffffff;
+}
+
+.bnav {
+    background-color: #790c5a;
+}
+
+.logo {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* carousel */
+
+.carousel-item{
+    height: 32rem;
+    background-color: #cc0e74;
+    color: #ffffff;
+    position: relative;
+    background-position: center;
+    background-size: cover;
+}
+
+.container{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding-bottom: 50px;
+
+}
+
+/* features  */
+
+.features {
+    padding: 0;
+}
+
+.card {
+    padding: 5px;
+}
+
+/* footer  */
+
+footer {
+    background-color: #f1d4d4;
+    padding: 5% 10%;
+    text-align: center;
+}
+
+/**************************/
+
+/* Signup page */
+
+.form-img {
+    background-image: url("/images/cinema2.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+    padding: 15px;;
+}
+
+.form-content {
+    width: 40%;
+    margin: auto;
+    background-color: #ffffff;
+    padding: 15px;;
+}
+
+.btn {
+    background-color: #cc0e74;
+    color: #ffffff;
+}
+
+form p {
+    display: inline;
+}
+
+/******************/
+/* About */
+
+.about {
+    margin: 50px;
+    padding: 15px;
+}
+
+
+.available {
+  height: 50px;
+  width: 50px;
+  background-color: #790c5a;
+}
+
+.booked {
+  height: 50px;
+  width: 50px;
+  background-color: #e6739f;
+}
+
+.trapezoid {
+	border-bottom: 100px solid #b30000;
+	border-left: 50px solid transparent;
+	border-right: 50px solid transparent;
+	height: 0;
+	width: 100%;
+}
+
+/* color palette
+f1d4d4
+e6739f
+cc0e74
+790c5a
+*/
