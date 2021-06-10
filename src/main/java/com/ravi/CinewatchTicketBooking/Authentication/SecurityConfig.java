@@ -47,49 +47,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-//        http.authorizeRequests().antMatchers(
-//                "/register**",
-//                "process_register",
-//                "/js/**",
-//                "/css/**",
-//                "/images/**").permitAll()
-//                .anyRequest().authenticated()
-//                .and()
-//                .formLogin()
-//                .loginPage("/login")
-//                .defaultSuccessUrl("/")
-//                .permitAll()
-//                .and()
-//                .logout()
-//                .invalidateHttpSession(true)
-//                .clearAuthentication(true)
-//                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-//                .logoutSuccessUrl("/login?logout")
-//                .permitAll();
-
-//        http.authorizeRequests().antMatchers(
-//                "/register**",
-//                "/process_register*",
-//                "/js/**",
-//                "/css/**",
-//                "/images/**").permitAll()
-//                .and()
-//                .authorizeRequests()
-//                .antMatchers("/admin*").hasAuthority("ADMIN")
-//                .antMatchers("/user*").hasAuthority("USER")
-//                .anyRequest().authenticated()
-//                .and()
-//                .formLogin()
-//                .loginPage("/login")
-//                .permitAll()
-//                .and()
-//                .logout()
-//                .invalidateHttpSession(true)
-//                .clearAuthentication(true)
-//                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-//                .logoutSuccessUrl("/login?logout")
-//                .permitAll();
-
         http.csrf().disable().authorizeRequests()
                 .antMatchers("/register**",
                         "/process_register*",
@@ -109,10 +66,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .logoutSuccessUrl("/login?logout")
                 .permitAll()
                 .and()
-                .exceptionHandling().accessDeniedPage("/403")
-//                .and()
-//                .addFilterAfter(new SameSiteFilter(), BasicAuthenticationFilter.class)
-        ;
+                .exceptionHandling().accessDeniedPage("/403");
 
     }
 

@@ -44,7 +44,7 @@
   <div class="row">
     <div class="col-4">
       <img th:src=${movie.Poster} alt="..." />
-      <a th:href="@{/cancelBooking/(bookingId=${booking.bookingId})}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Cancel Booking</a>
+      <a th:href="@{/cancelBooking/(bookingId=${booking.bookingId})}" class="btn btn-danger btn-lg active" role="button" aria-pressed="true" style=" margin: 57px; ">Cancel Booking</a>
     </div>
     <div class="col-8">
       <table class="table">

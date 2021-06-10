@@ -3,14 +3,10 @@ package com.ravi.CinewatchTicketBooking.controller;
 import com.paytm.pg.merchant.PaytmChecksum;
 import com.ravi.CinewatchTicketBooking.dao.PaymentRepository;
 import com.ravi.CinewatchTicketBooking.dao.UserRepository;
-import com.ravi.CinewatchTicketBooking.model.Booking;
-import com.ravi.CinewatchTicketBooking.model.PaymentModel;
-import com.ravi.CinewatchTicketBooking.model.PaytmModel;
-import com.ravi.CinewatchTicketBooking.model.User;
+import com.ravi.CinewatchTicketBooking.model.*;
 import com.ravi.CinewatchTicketBooking.service.BookingService;
-import com.ravi.CinewatchTicketBooking.service.MovieService;
+import com.ravi.CinewatchTicketBooking.service.SeatingService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,9 +16,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
-import java.util.Map;
-import java.util.Random;
-import java.util.TreeMap;
+import java.util.*;
 
 @Controller
 @RequestMapping("/payment")
@@ -38,12 +32,10 @@ public class PaytmController {
     UserRepository userRepository;
 
     @Autowired
-    MovieService movieService;
+    SeatingService seatingService;
 
     @Autowired
     private PaytmModel paytmModel;
-    @Autowired
-    private Environment env;
 
     @GetMapping("/")
     public String home() {
@@ -75,7 +67,7 @@ public class PaytmController {
     public String getResponseRedirect(HttpServletRequest request , Model model) {
 
         Map<String, String[]> mapData = request.getParameterMap();
-        TreeMap<String, String> parameters = new TreeMap<String, String>();
+        TreeMap<String, String> parameters = new TreeMap<>();
         mapData.forEach((key, val) -> parameters.put(key, val[0]));
         String paytmChecksum = "";
         if (mapData.containsKey("CHECKSUMHASH")) {
@@ -91,24 +83,37 @@ public class PaytmController {
         paymentModel.setTXNDATE(parameters.get("TXNDATE"));
         paymentModel.setTXNID(parameters.get("TXNID"));
         boolean isValidateChecksum = false;
-        System.out.println("RESULT : "+parameters.toString());
+        System.out.println("RESULT : "+parameters);
         try {
             isValidateChecksum = validateCheckSum(parameters, paytmChecksum);
                 if (parameters.get("RESPCODE").equals("01")) {
                     result = "Payment Successful";
                     paymentRepository.save(paymentModel);
                 } else {
-                    bookingService.delete(bookingService.findById(paymentModel.getORDERID()));
+                    Booking booking = bookingService.findById(paymentModel.getORDERID());
+                    Seating seating = seatingService.findBookedSeats(booking.getMovieTitle(),booking.getBookingDate(),booking.getTime(),booking.getTheatre());
+                    String[] seats = booking.getSeatNumber();
+                    String[] str = seating.getSeats();
+                    List<String> list1 = Arrays.asList(seats);
+                    List<String> list2 = Arrays.asList(str);
+                    List<String> union = new ArrayList<>(list1);
+                    union.addAll(list2);
+                    List<String> intersection = new ArrayList<>(list1);
+                    intersection.retainAll(list2);
+                    union.removeAll(intersection);
+                    String[] s = new String[union.size()];
+                    seating.setSeats(union.toArray(s));
+                    seatingService.save(seating);
+                    bookingService.delete(booking);
                     result = "Payment Failed";
                 }
         } catch (Exception e) {
             result = e.toString();
         }
+        model.addAttribute("result",result);
+        parameters.remove("CHECKSUMHASH");
         model.addAttribute("parameters",parameters);
         return "report";
-//        model.addAttribute("result",result);
-//        parameters.remove("CHECKSUMHASH");
-//        model.addAttribute("parameters",parameters);
     }
 
     private boolean validateCheckSum(TreeMap<String, String> parameters, String paytmChecksum) throws Exception {

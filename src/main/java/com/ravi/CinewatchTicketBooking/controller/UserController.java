@@ -1,11 +1,9 @@
 package com.ravi.CinewatchTicketBooking.controller;
 
 import com.google.common.collect.Lists;
-import com.paytm.pg.merchant.PaytmChecksum;
 import com.ravi.CinewatchTicketBooking.model.*;
 import com.ravi.CinewatchTicketBooking.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,25 +15,19 @@ import org.springframework.web.servlet.ModelAndView;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 @Controller
-public class HomeController {
-
-    @Autowired
-    RefundService refundService;
+public class UserController {
 
     @Autowired
     PaymentService paymentService;
 
     @Autowired
     BookingService bookingService;
-
-    @Autowired
-    private PaytmModel paytmModel;
-
-    @Autowired
-    private Environment env;
 
     @Autowired
     SeatingService seatingService;
@@ -93,14 +85,6 @@ public class HomeController {
         return "login";
     }
 
-    @GetMapping("/allMovies")
-    public String listMoviePage(Principal principal,Model model) {
-
-        List<List<Movie>> movieLists = Lists.partition(movieService.getAllMovies(),5);
-        model.addAttribute("movieLists",movieLists);
-        return "all_movies";
-    }
-
     @GetMapping("/book")
     public String book(@RequestParam String title,Model model) {
         Movie movie = movieService.getMovieByTitle(title);
@@ -137,7 +121,7 @@ public class HomeController {
     }
 
     @PostMapping("/checkout")
-    public ModelAndView checkout(Principal principal,SeatInput seatInput,Model model) throws Exception {
+    public ModelAndView checkout(Principal principal,SeatInput seatInput) throws Exception {
         String[] str = seatInput.getSeats().split(",");
         Booking booking = bookingService.findById(String.valueOf(seatInput.getBookingId()));
         Seating seating = seatingService.findBookedSeats(booking.getMovieTitle(),booking.getBookingDate(),booking.getTime(),booking.getTheatre());
@@ -150,69 +134,22 @@ public class HomeController {
             }
         }
         if (flag) {
-            ModelAndView modelAndView = new ModelAndView("book");
-            modelAndView.addObject("flag", true);
-            modelAndView.addObject("booked",booked);
-            modelAndView.addObject("movie",movieService.getMovieByTitle(booking.getMovieTitle()));
-            List<String> theatreList = Arrays.asList("Maya Cineplex", "PVR", "Inox");
-            List<String> timingList = Arrays.asList("9", "12", "3");
-            modelAndView.addObject("theatreList",theatreList);
-            modelAndView.addObject("timingList",timingList);
-            modelAndView.addObject("currentDate", LocalDate.now());
-            bookingService.delete(booking);
-            booking = new Booking();
-            modelAndView.addObject("booking",booking);
-            return modelAndView;
+            return movieService.bookingFirstPage(true,booked,booking);
         }
-        if (seating!=null) {
-            String[] str1 = seating.getSeats();
-            String[] str2 = new String[str1.length+str.length];
-            System.arraycopy(str, 0, str2, 0, str.length);
-            System.arraycopy(str1, 0, str2, str.length, str1.length);
-            seating.setSeats(str2);
-        }
-        else {
-            Seating seating1 = new Seating();
-            seating1.setMovieTitle(booking.getMovieTitle());
-            seating1.setBookingDate(booking.getBookingDate());
-            seating1.setTiming(booking.getTime());
-            seating1.setTheatre(booking.getTheatre());
-            seating1.setSeats(str);
-            seating = seating1;
-        }
+        seating = seatingService.getSeats(seating,booking,str);
         booking.setSeatNumber(str);
         booking.setSeats(str.length);
-        int amount = 0;
-        for (String s:str) {
-            if (s.contains("A")||s.contains("B")||s.contains("a")||s.contains("b"))
-                amount += 100;
-            else if (s.contains("C")||s.contains("D")||s.contains("c")||s.contains("d"))
-                amount += 200;
-        }
+        int amount = bookingService.getAmount(str);
         booking.setTransactionAmount(String.valueOf(amount));
         bookingService.save(booking);
         seatingService.save(seating);
 
-        ModelAndView modelAndView = new ModelAndView("redirect:" + paytmModel.getPaytmUrl());
-        User user = userService.findByEmail(principal.getName());
-        TreeMap<String, String> parameters = new TreeMap<>();
-        paytmModel.getDetails().forEach(parameters::put);
-        parameters.put("MOBILE_NO", user.getMobileNumber());
-        parameters.put("EMAIL", user.getEmail());
-        parameters.put("ORDER_ID", String.valueOf(booking.getBookingId()));
-        parameters.put("TXN_AMOUNT", booking.getTransactionAmount());
-        parameters.put("CUST_ID", String.valueOf(user.getUser_id()));
-        String checkSum = getCheckSum(parameters);
-        parameters.put("CHECKSUMHASH", checkSum);
-        modelAndView.addAllObjects(parameters);
-        return modelAndView;
-
+        return paymentService.getPaymentPage(principal,booking);
 
     }
 
     @GetMapping("/reportOne")
-    public String reportOne(@RequestParam String id, Principal principal, Model model) {
-        User user = userService.findByEmail(principal.getName());
+    public String reportOne(@RequestParam String id, Model model) {
         Booking booking = bookingService.findById(id);
         Movie movie = movieService.getMovieByTitle(booking.getMovieTitle());
         model.addAttribute("movie",movie);
@@ -235,41 +172,9 @@ public class HomeController {
 
     @GetMapping("cancelBooking")
     public String cancelBooking(@RequestParam String bookingId, Principal principal,Model model) {
-        PaymentModel paymentModel = paymentService.findById(bookingId);
-        RefundModel refundModel = new RefundModel();
-        refundModel.setORDERID(paymentModel.getORDERID());
-        refundModel.setTXNID(paymentModel.getTXNID());
-        refundModel.setTXNDATE(paymentModel.getTXNDATE());
-        refundModel.setTXNAMOUNT(paymentModel.getTXNAMOUNT());
-        refundModel.setPAYMENTMODE(paymentModel.getPAYMENTMODE());
-        refundModel.setRESPCODE(paymentModel.getRESPCODE());
-        Booking booking = bookingService.findById(bookingId);
-        Seating seating = seatingService.findBookedSeats(booking.getMovieTitle(),booking.getBookingDate(),booking.getTime(),booking.getTheatre());
-        String[] seats = booking.getSeatNumber();
-        String[] str = seating.getSeats();
-        List<String> list1 = Arrays.asList(seats);
-        List<String> list2 = Arrays.asList(str);
-        List<String> union = new ArrayList<>(list1);
-        union.addAll(list2);
-        List<String> intersection = new ArrayList<>(list1);
-        intersection.retainAll(list2);
-        union.removeAll(intersection);
-        String[] s = new String[union.size()];
-        seating.setSeats(union.toArray(s));
-        seatingService.save(seating);
-        bookingService.delete(booking);
-        paymentService.delete(paymentModel);
-        refundService.save(refundModel);
+        bookingService.cancelBooking(bookingId,model);
         return myBookings(principal, model);
     }
 
-    private boolean validateCheckSum(TreeMap<String, String> parameters, String paytmChecksum) throws Exception {
-        return PaytmChecksum.verifySignature(parameters,paytmModel.getMerchantKey(), paytmChecksum);
-    }
-
-
-    private String getCheckSum(TreeMap<String, String> parameters) throws Exception {
-        return PaytmChecksum.generateSignature(parameters,paytmModel.getMerchantKey());
-    }
 
 }

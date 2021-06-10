@@ -1,19 +1,26 @@
 package com.ravi.CinewatchTicketBooking.service.Impl;
 
 import com.ravi.CinewatchTicketBooking.dao.MovieRepository;
+import com.ravi.CinewatchTicketBooking.model.Booking;
 import com.ravi.CinewatchTicketBooking.model.Movie;
 import com.ravi.CinewatchTicketBooking.model.Seating;
+import com.ravi.CinewatchTicketBooking.service.BookingService;
 import com.ravi.CinewatchTicketBooking.service.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
 public class MovieServiceImpl implements MovieService {
+
+    @Autowired
+    BookingService bookingService;
 
     @Autowired
     MovieRepository movieRepository;
@@ -122,6 +129,23 @@ public class MovieServiceImpl implements MovieService {
         model.addAttribute("mapB",mapB);
         model.addAttribute("mapC",mapC);
         model.addAttribute("mapD",mapD);
+    }
+
+    @Override
+    public ModelAndView bookingFirstPage(boolean flag, StringBuilder booked, Booking booking) {
+        ModelAndView modelAndView = new ModelAndView("book");
+        modelAndView.addObject("flag", true);
+        modelAndView.addObject("booked",booked);
+        modelAndView.addObject("movie",getMovieByTitle(booking.getMovieTitle()));
+        List<String> theatreList = Arrays.asList("Maya Cineplex", "PVR", "Inox");
+        List<String> timingList = Arrays.asList("9", "12", "3");
+        modelAndView.addObject("theatreList",theatreList);
+        modelAndView.addObject("timingList",timingList);
+        modelAndView.addObject("currentDate", LocalDate.now());
+        bookingService.delete(booking);
+        booking = new Booking();
+        modelAndView.addObject("booking",booking);
+        return modelAndView;
     }
 
 }
