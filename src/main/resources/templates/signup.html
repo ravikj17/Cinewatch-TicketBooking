@@ -36,31 +36,34 @@
 
 <div class="form-img">
   <div class="form-content">
+    <div class="alert alert-warning" th:if="${message!=null}" role="alert">
+    <p  th:text="${message}" ></p>
+    </div>
     <form th:action="@{/process_register}" th:object="${user}"
           method="post">
       <h3>Sign Up</h3>
       <div class="form-group">
         <label>First Name</label>
-        <input type="text" class="form-control" th:field="*{firstName}" placeholder="First Name">
+        <input type="text" class="form-control" th:field="*{firstName}" placeholder="First Name" required>
       </div>
       <div class="form-group">
         <label>Last Name</label>
-        <input type="text" class="form-control" th:field="*{lastName}" placeholder="Last Name">
+        <input type="text" class="form-control" th:field="*{lastName}" placeholder="Last Name" required>
       </div>
       <div class="form-group">
         <label>Mobile Number</label>
-        <input type="text" class="form-control" th:field="*{mobileNumber}"  placeholder="Mobile Number">
+        <input type="text" class="form-control" th:field="*{mobileNumber}"  placeholder="Mobile Number" required>
       </div>
       <div class="form-group">
         <label>Email address</label>
-        <input type="email" class="form-control" th:field="*{email}"  placeholder="Enter email">
+        <input type="email" class="form-control" th:field="*{email}"  placeholder="Enter email" required>
       </div>
       <div class="form-group">
         <label>Password</label>
-        <input type="password" class="form-control" th:field="*{password}" placeholder="Password">
+        <input type="password" class="form-control" th:field="*{password}" placeholder="Password" required>
       </div>
       <button type="submit" class="btn-lg btn">Register<i class="fas fa-user-plus"></i></button>
-      <p>Already a member ?<a href="./login">Signin</a></p>
+      <p>Already a member ?<a href="./login">Sign in</a></p>
     </form>
   </div>
 </div>

@@ -42,7 +42,8 @@
             <p class="card-text"><td th:text="${movie.Language}"></td></p>
             <p class="card-text"><small class="text-muted"><td th:text="${movie.Genre}"></small></p>
             <div style="text-align: center;">
-                <a th:href="@{/admin/deleteMovie/(movieName=${movie.Title})}" class="btn btn-danger btn-lg active" role="button" aria-pressed="true">Remove</a>
+                <a th:href="@{/admin/deleteMovie/(movieName=${movie.Title})}" class="btn btn-danger btn-lg active" role="button" aria-pressed="true"
+                   th:data-confirm-delete="|Are you sure you want to remove this movie ${movie.Title}?|" onclick="if (!confirm(this.getAttribute('data-confirm-delete'))) return false">Remove</a>
             </div>
         </div>
     </div>

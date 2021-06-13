@@ -52,12 +52,20 @@ public class UserController {
     }
 
     @PostMapping("/process_register")
-    public String processRegister(User user) {
+    public String processRegister(User user, Model model) {
+        String message;
+        if (userService.findByEmail(user.getEmail())!=null) {
+            message = "User already exists";
+            model.addAttribute("message", message);
+            return "signup";
+        }
+        message = "Registration successful! Please Log in";
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
         user.setRole("USER");
         userService.save(user);
+        model.addAttribute("message", message);
         return "login";
     }
 
