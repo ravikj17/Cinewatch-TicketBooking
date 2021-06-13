@@ -20,4 +20,6 @@ public interface MovieService {
     void addSeats(Model model, Seating seating);
 
     ModelAndView bookingFirstPage(boolean flag, StringBuilder booked, Booking booking);
+
+    void deleteMovie(String movieName);
 }

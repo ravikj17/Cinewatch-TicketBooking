@@ -134,9 +134,18 @@ form p {
 	width: 100%;
 }
 
+.shadow-box {
+    margin:125px;
+    padding: 10px;
+    box-shadow: 5px 10px 8px 10px #ff3ff9;
+}
+
 /* color palette
 f1d4d4
 e6739f
 cc0e74
 790c5a
 */
+
+/*c73fff */
+

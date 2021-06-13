@@ -33,7 +33,7 @@
     </div>
 </header>
 
-<div class="card-group features">
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-5 g-3" style="margin: 0;">
     <div class="card" th:each="movie: ${movies}">
         <img th:src=${movie.Poster} class="card-img-top" alt="..." />
         <div class="card-body">
@@ -41,6 +41,9 @@
             <p class="card-text"><td th:text="${movie.Rated}"></td></p>
             <p class="card-text"><td th:text="${movie.Language}"></td></p>
             <p class="card-text"><small class="text-muted"><td th:text="${movie.Genre}"></small></p>
+            <div style="text-align: center;">
+                <a th:href="@{/admin/deleteMovie/(movieName=${movie.Title})}" class="btn btn-danger btn-lg active" role="button" aria-pressed="true">Remove</a>
+            </div>
         </div>
     </div>
 </div>

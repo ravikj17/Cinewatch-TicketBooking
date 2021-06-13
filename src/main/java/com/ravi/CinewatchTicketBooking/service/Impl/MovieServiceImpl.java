@@ -148,4 +148,10 @@ public class MovieServiceImpl implements MovieService {
         return modelAndView;
     }
 
+    @Override
+    public void deleteMovie(String movieName) {
+        Movie movie = getMovieByTitle(movieName);
+        movieRepository.delete(movie);
+    }
+
 }
